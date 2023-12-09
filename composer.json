@@ -1,0 +1,41 @@
+{
+    "name": "mollsoft/laravel-bitcoin-module",
+    "description": "Laravel Bitcoin Module",
+    "homepage": "https://github.com/mollsoft/laravel-bitcoin-module",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "MollSoft",
+            "email": "info@mollsoft.com"
+        }
+    ],
+    "keywords": [
+        "mollsoft",
+        "laravel",
+        "bitcoin"
+    ],
+    "require": {
+        "php": "^8.2",
+        "ext-decimal": "*",
+        "guzzlehttp/guzzle": "^7.2",
+        "illuminate/contracts": "^10.0",
+        "spatie/laravel-package-tools": "^1.15"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mollsoft\\LaravelBitcoinModule\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mollsoft\\LaravelBitcoinModule\\BitcoinServiceProvider"
+            ],
+            "aliases": {
+                "Bitcoin": "Mollsoft\\LaravelBitcoinModule\\Facades\\Bitcoin"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
