@@ -148,4 +148,23 @@ class Bitcoin
 
         return AddressType::LEGACY;
     }
+
+    public function sendAll(BitcoinWallet $wallet, string $address, int|float|null $feeRate = null)
+    {
+        if ($wallet->password) {
+            $this->api->request('walletpassphrase', [
+                'passphrase' => $wallet->password,
+                'timeout' => 60
+            ], $wallet->name);
+        }
+
+        return $this->api->request('sendall', [
+            'recipients' => [$address],
+            'estimate_mode' => $feeRate ? 'unset' : 'economical',
+            'fee_rate' => $feeRate,
+            'options' => [
+                'send_max' => true,
+            ]
+        ], $wallet->name);
+    }
 }

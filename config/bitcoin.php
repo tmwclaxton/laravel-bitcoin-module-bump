@@ -12,8 +12,7 @@ return [
     ],
 
     /*
-     * Sets the handler to be used when Tron Wallet
-     * receives a new transaction.
+     * Sets the handler to be used when Bitcoin Wallet has a new deposit.
      */
     'webhook_handler' => \Mollsoft\LaravelBitcoinModule\WebhookHandlers\EmptyWebhookHandler::class,
 
@@ -33,6 +32,6 @@ return [
     'models' => [
         'wallet' => \Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet::class,
         'address' => \Mollsoft\LaravelBitcoinModule\Models\BitcoinAddress::class,
-        'transaction' => \Mollsoft\LaravelBitcoinModule\Models\BitcoinTransaction::class,
+        'deposit' => \Mollsoft\LaravelBitcoinModule\Models\BitcoinDeposit::class,
     ],
 ];

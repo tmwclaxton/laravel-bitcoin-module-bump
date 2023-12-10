@@ -4,23 +4,20 @@ namespace Mollsoft\LaravelBitcoinModule\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Mollsoft\LaravelBitcoinModule\Enums\TransactionCategory;
 
-class BitcoinTransaction extends Model
+class BitcoinDeposit extends Model
 {
     protected $fillable = [
         'wallet_id',
         'address_id',
         'txid',
-        'category',
         'amount',
         'block_height',
-        'time_at',
         'confirmations',
+        'time_at',
     ];
 
     protected $casts = [
-        'category' => TransactionCategory::class,
         'time_at' => 'timestamp',
     ];
 

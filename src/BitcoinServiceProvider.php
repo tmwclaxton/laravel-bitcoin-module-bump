@@ -18,7 +18,7 @@ class BitcoinServiceProvider extends PackageServiceProvider
             ->hasMigrations([
                 '2023_12_01_000001_create_bitcoin_wallets_table',
                 '2023_12_01_000002_create_bitcoin_addresses_table',
-                '2023_12_01_000003_create_bitcoin_transactions_table',
+                '2023_12_01_000003_create_bitcoin_deposits_table',
             ])
             ->runsMigrations()
             ->hasCommands(

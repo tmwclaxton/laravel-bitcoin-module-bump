@@ -35,10 +35,10 @@ class BitcoinAddress extends Model
         return $this->belongsTo($model, 'wallet_id', 'id');
     }
 
-    public function transactions(): HasMany
+    public function deposits(): HasMany
     {
-        /** @var class-string<BitcoinTransaction> $model */
-        $model = config('bitcoin.models.transaction');
+        /** @var class-string<BitcoinDeposit> $model */
+        $model = config('bitcoin.models.deposit');
 
         return $this->hasMany($model, 'address_id', 'id');
     }

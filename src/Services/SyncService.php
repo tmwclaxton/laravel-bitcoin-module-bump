@@ -3,18 +3,16 @@
 namespace Mollsoft\LaravelBitcoinModule\Services;
 
 use Decimal\Decimal;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Date;
 use Mollsoft\LaravelBitcoinModule\BitcoindRpcApi;
-use Mollsoft\LaravelBitcoinModule\Enums\TransactionCategory;
-use Mollsoft\LaravelBitcoinModule\Models\BitcoinTransaction;
+use Mollsoft\LaravelBitcoinModule\Models\BitcoinDeposit;
 use Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet;
 
 class SyncService
 {
-    /** @var BitcoinTransaction[] */
-    protected array $newTransactions = [];
+    /** @var BitcoinDeposit[] */
+    protected array $newDeposits = [];
 
     public function __construct(
         protected readonly BitcoinWallet $wallet,
@@ -28,7 +26,7 @@ class SyncService
             ->unlockWallet()
             ->walletBalances()
             ->addressesBalances()
-            ->syncTransactions()
+            ->syncDeposits()
             ->executeWebhooks();
     }
 
@@ -59,17 +57,16 @@ class SyncService
     protected function addressesBalances(): self
     {
         $listUnspent = $this->api->request('listunspent', ['minconf' => 0], $this->wallet->name);
-        if (count($listUnspent) > 0) {
-            $this->wallet
-                ->addresses()
-                ->whereNull('sync_at')
-                ->orWhereNot('sync_at', $this->wallet->sync_at)
-                ->update([
-                    'sync_at' => $this->wallet->sync_at,
-                    'balance' => 0,
-                    'unconfirmed_balance' => 0,
-                ]);
 
+        $this->wallet
+            ->addresses()
+            ->update([
+                'sync_at' => Date::now(),
+                'balance' => 0,
+                'unconfirmed_balance' => 0,
+            ]);
+
+        if (count($listUnspent) > 0) {
             foreach ($listUnspent as $item) {
                 $address = $this->wallet
                     ->addresses()
@@ -86,28 +83,31 @@ class SyncService
         return $this;
     }
 
-    protected function syncTransactions(): self
+    protected function syncDeposits(): self
     {
         $listTransactions = $this->api->request('listtransactions', [
             'count' => 100,
         ], $this->wallet->name);
 
         foreach ($listTransactions as $item) {
+            if( $item['category'] !== 'receive' ) {
+                continue;
+            }
+
             $address = $this->wallet->addresses()->whereAddress($item['address'])->first();
 
-            $transaction = $address?->transactions()->updateOrCreate([
-                'txid' => $item['txid'],
-                'category' => TransactionCategory::from($item['category']),
+            $deposit = $address?->deposits()->updateOrCreate([
+                'txid' => $item['txid']
             ], [
                 'wallet_id' => $this->wallet->id,
                 'amount' => new Decimal((string)$item['amount']),
                 'block_height' => $item['blockheight'] ?? null,
-                'time_at' => Date::createFromTimestamp($item['time']),
                 'confirmations' => $item['confirmations'],
+                'time_at' => Date::createFromTimestamp($item['time']),
             ]);
 
-            if ($transaction?->wasRecentlyCreated) {
-                $this->newTransactions[] = $transaction;
+            if ($deposit?->wasRecentlyCreated) {
+                $this->newDeposits[] = $deposit;
             }
         }
 
@@ -116,9 +116,9 @@ class SyncService
 
     protected function executeWebhooks(): self
     {
-        foreach ($this->newTransactions as $transaction) {
+        foreach ($this->newDeposits as $deposit) {
             Artisan::call('bitcoin:webhook', [
-                'transaction_id' => $transaction->id,
+                'deposit_id' => $deposit->id,
             ]);
         }
 
