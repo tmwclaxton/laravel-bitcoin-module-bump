@@ -27,7 +27,7 @@ return [
      *
      * BitcoinWallet model must be or extend `Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet::class`
      * BitcoinAddress model must be or extend `Mollsoft\LaravelBitcoinModule\Models\BitcoinAddress::class`
-     * BitcoinTransaction model must be or extend `Mollsoft\LaravelBitcoinModule\Models\BitcoinTransaction::class`
+     * BitcoinDeposit model must be or extend `Mollsoft\LaravelBitcoinModule\Models\BitcoinDeposit::class`
      */
     'models' => [
         'wallet' => \Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet::class,
