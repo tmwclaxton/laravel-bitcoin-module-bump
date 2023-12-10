@@ -22,7 +22,7 @@ return [
     'address_type' => \App\Enums\AddressType::BECH32,
 
     /*
-     * Set model class for both BitcoinWallet, BitcoinAddress, BitcoinTransaction,
+     * Set model class for both BitcoinWallet, BitcoinAddress, BitcoinDeposit,
      * to allow more customization.
      *
      * BitcoinWallet model must be or extend `Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet::class`
