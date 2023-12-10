@@ -8,5 +8,5 @@ use Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet;
 
 interface WebhookHandlerInterface
 {
-    public function handle(BitcoinWallet $wallet, BitcoinAddress $address, BitcoinDeposit $transaction): void;
+    public function handle(BitcoinWallet $wallet, BitcoinAddress $address, BitcoinDeposit $deposit): void;
 }
