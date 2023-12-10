@@ -66,6 +66,27 @@ if( $addressType === null ) {
 var_dump($addressType); // Enum value of AddressType
 ```
 
+Send all BTC from wallet:
+```php
+$wallet = BitcoinWallet::firstOrFail();
+$address = 'to_address';
+
+$txid = Bitcoin::sendAll($wallet, $address);
+
+echo 'TXID: '.$txid;
+```
+
+Send BTC from wallet:
+```php
+$wallet = BitcoinWallet::firstOrFail();
+$address = 'to_address';
+$amount = 0.001;
+
+$txid = Bitcoin::send($wallet, $address, $amount);
+
+echo 'TXID: '.$txid;
+```
+
 
 ## Install
 
@@ -100,6 +121,28 @@ Scan transactions and update balances for wallet:
 
 ```bash
 > php artisan bitcoin:sync-wallet {wallet_id}
+```
+
+## WebHook
+
+You can set up a WebHook that will be called when a new incoming BTC deposit is detected.
+
+In file config/bitcoin.php you can set param:
+
+```php
+'webhook_handler' => \Mollsoft\LaravelBitcoinModule\WebhookHandlers\EmptyWebhookHandler::class,
+```
+
+Example WebHook handler:
+
+```php
+class EmptyWebhookHandler implements WebhookHandlerInterface
+{
+    public function handle(BitcoinWallet $wallet, BitcoinAddress $address, BitcoinDeposit $transaction): void
+    {
+        Log::error('Bitcoin Wallet '.$wallet->name.' new transaction '.$transaction->txid.' for address '.$address->address);
+    }
+}
 ```
 
 ## Requirements
