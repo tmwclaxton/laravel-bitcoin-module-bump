@@ -4,6 +4,7 @@ namespace Mollsoft\LaravelBitcoinModule\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Mollsoft\LaravelBitcoinModule\Casts\DecimalCast;
 
 class BitcoinDeposit extends Model
 {
@@ -18,6 +19,7 @@ class BitcoinDeposit extends Model
     ];
 
     protected $casts = [
+        'amount' => DecimalCast::class,
         'time_at' => 'timestamp',
     ];
 
