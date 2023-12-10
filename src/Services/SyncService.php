@@ -3,16 +3,22 @@
 namespace Mollsoft\LaravelBitcoinModule\Services;
 
 use Decimal\Decimal;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Date;
 use Mollsoft\LaravelBitcoinModule\BitcoindRpcApi;
 use Mollsoft\LaravelBitcoinModule\Enums\TransactionCategory;
+use Mollsoft\LaravelBitcoinModule\Models\BitcoinTransaction;
 use Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet;
 
-readonly class SyncService
+class SyncService
 {
+    /** @var BitcoinTransaction[] */
+    protected array $newTransactions = [];
+
     public function __construct(
-        protected BitcoinWallet $wallet,
-        protected BitcoindRpcApi $api,
+        protected readonly BitcoinWallet $wallet,
+        protected readonly BitcoindRpcApi $api,
     ) {
     }
 
@@ -22,12 +28,13 @@ readonly class SyncService
             ->unlockWallet()
             ->walletBalances()
             ->addressesBalances()
-            ->syncTransactions();
+            ->syncTransactions()
+            ->executeWebhooks();
     }
 
     protected function unlockWallet(): self
     {
-        if( $this->wallet->password ) {
+        if ($this->wallet->password) {
             $this->api->request('walletpassphrase', [
                 'passphrase' => $this->wallet->password,
                 'timeout' => 60,
@@ -85,9 +92,10 @@ readonly class SyncService
             'count' => 100,
         ], $this->wallet->name);
 
-        foreach( $listTransactions as $item ) {
+        foreach ($listTransactions as $item) {
             $address = $this->wallet->addresses()->whereAddress($item['address'])->first();
-            $address?->transactions()->updateOrCreate([
+
+            $transaction = $address?->transactions()->updateOrCreate([
                 'txid' => $item['txid'],
                 'category' => TransactionCategory::from($item['category']),
             ], [
@@ -96,6 +104,21 @@ readonly class SyncService
                 'block_height' => $item['blockheight'] ?? null,
                 'time_at' => Date::createFromTimestamp($item['time']),
                 'confirmations' => $item['confirmations'],
+            ]);
+
+            if ($transaction?->wasRecentlyCreated) {
+                $this->newTransactions[] = $transaction;
+            }
+        }
+
+        return $this;
+    }
+
+    protected function executeWebhooks(): self
+    {
+        foreach ($this->newTransactions as $transaction) {
+            Artisan::call('bitcoin:webhook', [
+                'transaction_id' => $transaction->id,
             ]);
         }
 

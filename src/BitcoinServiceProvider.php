@@ -4,6 +4,7 @@ namespace Mollsoft\LaravelBitcoinModule;
 
 use Mollsoft\LaravelBitcoinModule\Commands\BitcoinSyncCommand;
 use Mollsoft\LaravelBitcoinModule\Commands\BitcoinSyncWalletCommand;
+use Mollsoft\LaravelBitcoinModule\Commands\BitcoinWebhookCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -23,6 +24,7 @@ class BitcoinServiceProvider extends PackageServiceProvider
             ->hasCommands(
                 BitcoinSyncCommand::class,
                 BitcoinSyncWalletCommand::class,
+                BitcoinWebhookCommand::class,
             );
 
         $this->app->singleton(BitcoindRpcApi::class, fn() => new BitcoindRpcApi(
