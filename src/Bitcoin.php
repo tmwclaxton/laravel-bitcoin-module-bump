@@ -66,9 +66,15 @@ class Bitcoin
             ], $name);
         }
 
-        $this->api->request('importdescriptors', [
+        $importDescriptors = $this->api->request('importdescriptors', [
             'requests' => $descriptors,
         ], $name);
+
+        foreach( $importDescriptors as $item ) {
+            if( !($item['success'] ?? false) ) {
+                throw new \Exception('ImportDescriptors '.($item['error']['code'] ?? 0).' - '.($item['error']['message'] ?? ''));
+            }
+        }
 
         /** @var class-string<BitcoinWallet> $model */
         $model = config('bitcoin.models.wallet');
