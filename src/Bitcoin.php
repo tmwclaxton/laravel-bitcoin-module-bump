@@ -2,6 +2,7 @@
 
 namespace Mollsoft\LaravelBitcoinModule;
 
+use Decimal\Decimal;
 use Mollsoft\LaravelBitcoinModule\Enums\AddressType;
 use Mollsoft\LaravelBitcoinModule\Models\BitcoinAddress;
 use Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet;
@@ -70,9 +71,11 @@ class Bitcoin
             'requests' => $descriptors,
         ], $name);
 
-        foreach( $importDescriptors as $item ) {
-            if( !($item['success'] ?? false) ) {
-                throw new \Exception('ImportDescriptors '.($item['error']['code'] ?? 0).' - '.($item['error']['message'] ?? ''));
+        foreach ($importDescriptors as $item) {
+            if (!($item['success'] ?? false)) {
+                throw new \Exception(
+                    'ImportDescriptors '.($item['error']['code'] ?? 0).' - '.($item['error']['message'] ?? '')
+                );
             }
         }
 
@@ -135,21 +138,21 @@ class Bitcoin
             'address' => $address
         ]);
 
-        if( !($validateAddress['isvalid'] ?? false) ) {
+        if (!($validateAddress['isvalid'] ?? false)) {
             return null;
         }
 
-        if( $validateAddress['iswitness'] ?? false ) {
+        if ($validateAddress['iswitness'] ?? false) {
             return ($validateAddress['witness_version'] ?? false) ? AddressType::BECH32M : AddressType::BECH32;
         }
-        if( $validateAddress['isscript'] ?? false ) {
+        if ($validateAddress['isscript'] ?? false) {
             return AddressType::P2SH_SEGWIT;
         }
 
         return AddressType::LEGACY;
     }
 
-    public function sendAll(BitcoinWallet $wallet, string $address, int|float|null $feeRate = null)
+    public function sendAll(BitcoinWallet $wallet, string $address, int|float|null $feeRate = null): string
     {
         if ($wallet->password) {
             $this->api->request('walletpassphrase', [
@@ -158,7 +161,7 @@ class Bitcoin
             ], $wallet->name);
         }
 
-        return $this->api->request('sendall', [
+        $sendAll = $this->api->request('sendall', [
             'recipients' => [$address],
             'estimate_mode' => $feeRate ? 'unset' : 'economical',
             'fee_rate' => $feeRate,
@@ -166,5 +169,44 @@ class Bitcoin
                 'send_max' => true,
             ]
         ], $wallet->name);
+
+        if (!($sendAll['complete'] ?? false)) {
+            throw new \Exception(json_encode($sendAll));
+        }
+
+        return $sendAll['txid'];
+    }
+
+    public function send(
+        BitcoinWallet $wallet,
+        string $address,
+        int|float|string|Decimal $amount,
+        int|float|null $feeRate = null,
+        bool $subtractFeeFromAmount = false
+    ): string {
+        if (($amount instanceof Decimal)) {
+            $amount = new Decimal((string)$amount, 8);
+        }
+
+        if ($wallet->password) {
+            $this->api->request('walletpassphrase', [
+                'passphrase' => $wallet->password,
+                'timeout' => 60
+            ], $wallet->name);
+        }
+
+        $sendToAddress = $this->api->request('sendtoaddress', [
+            'address' => $address,
+            'amount' => $amount->toString(),
+            'subtractfeefromamount' => $subtractFeeFromAmount,
+            'estimate_mode' => $feeRate ? 'unset' : 'economical',
+            'fee_rate' => $feeRate
+        ], $wallet->name);
+
+        if (!($sendToAddress['txid'] ?? false)) {
+            throw new \Exception(json_encode($sendToAddress));
+        }
+
+        return $sendToAddress['txid'];
     }
 }
