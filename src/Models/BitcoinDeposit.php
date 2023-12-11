@@ -20,7 +20,7 @@ class BitcoinDeposit extends Model
 
     protected $casts = [
         'amount' => DecimalCast::class,
-        'time_at' => 'timestamp',
+        'time_at' => 'datetime',
     ];
 
     public function wallet(): BelongsTo
