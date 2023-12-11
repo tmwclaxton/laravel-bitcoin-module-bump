@@ -10,6 +10,27 @@ use Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet;
 
 class Bitcoin
 {
+    public function createNode(string $name, ?string $title, string $host, int $port = 8332, string $username = null, string $password = null): BitcoinNode
+    {
+        /** @var class-string<BitcoinNode> $model */
+        $model = config('bitcoin.models.rpc_client');
+        $api = new $model($host, $port, $username, $password);
+
+        $api->request('getblockchaininfo');
+
+        /** @var class-string<BitcoinNode> $model */
+        $model = config('bitcoin.models.node');
+
+        return $model::create([
+            'name' => $name,
+            'title' => $title,
+            'host' => $host,
+            'port' => $port,
+            'username' => $username,
+            'password' => $password,
+        ]);
+    }
+
     public function createWallet(BitcoinNode $node, string $name, ?string $password = null, ?string $title = null): BitcoinWallet
     {
         $api = $node->api();

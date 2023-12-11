@@ -33,7 +33,8 @@ $name = 'my-wallet';
 $password = 'password for encrypt wallet files';
 $title = 'My First Wallet';
 
-$wallet = Bitcoin::createWallet($name, $password, $title);
+$node = Bitcoin::createNode('localhost', 'LocalHost', '127.0.0.1');
+$wallet = Bitcoin::createWallet($node, $name, $password, $title);
 ```
 
 Import Descriptor Wallet using descriptors:
@@ -43,7 +44,8 @@ $password = 'password for encrypt wallet files';
 $descriptions = json_decode('DESCRIPTORS JSON', true);
 $title = 'My First Wallet';
 
-$wallet = Bitcoin::importWallet($name, $descriptions, $password, $title);
+$node = Bitcoin::createNode('localhost', 'LocalHost', '127.0.0.1');
+$wallet = Bitcoin::importWallet($node, $name, $descriptions, $password, $title);
 ```
 
 Create address:
@@ -58,7 +60,8 @@ Validate address:
 ```php
 $address = '....';
 
-$addressType = Bitcoin::validateAddress($address);
+$node = BitcoinNode::firstOrFail();
+$addressType = Bitcoin::validateAddress($node, $address);
 if( $addressType === null ) {
     die('Address is not valid!');
 } 
@@ -99,14 +102,6 @@ echo 'TXID: '.$txid;
 In file `app/Console/Kernel` in method `schedule(Schedule $schedule)` add
 ```
 $schedule->command('bitcoin:sync')->everyMinute()->runInBackground();
-```
-
-In .env file add:
-```
-BITCOIN_RPC_HOST="127.0.0.1"
-BITCOIN_RPC_PORT=8332
-BITCOIN_RPC_USERNAME="admin"
-BITCOIN_RPC_PASSWORD="admin"
 ```
 
 ## Commands
