@@ -3,6 +3,7 @@
 namespace Mollsoft\LaravelBitcoinModule\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Mollsoft\LaravelBitcoinModule\Casts\DecimalCast;
 
@@ -31,12 +32,20 @@ class BitcoinWallet extends Model
         'unconfirmed_balance' => DecimalCast::class,
     ];
 
+    public function node(): BelongsTo
+    {
+        /** @var class-string<BitcoinNode> $model */
+        $model = config('bitcoin.models.node');
+
+        return $this->belongsTo($model, 'node_id');
+    }
+
     public function addresses(): HasMany
     {
-        /** @var class-string<BitcoinAddress> $addressModel */
-        $addressModel = config('bitcoin.models.address');
+        /** @var class-string<BitcoinAddress> $model */
+        $model = config('bitcoin.models.address');
 
-        return $this->hasMany($addressModel, 'wallet_id', 'id');
+        return $this->hasMany($model, 'wallet_id', 'id');
     }
 
     public function deposits(): HasMany

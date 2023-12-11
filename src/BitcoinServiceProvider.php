@@ -16,9 +16,10 @@ class BitcoinServiceProvider extends PackageServiceProvider
             ->name('bitcoin')
             ->hasConfigFile()
             ->hasMigrations([
-                '2023_12_01_000001_create_bitcoin_wallets_table',
-                '2023_12_01_000002_create_bitcoin_addresses_table',
-                '2023_12_01_000003_create_bitcoin_deposits_table',
+                'create_bitcoin_nodes_table',
+                'create_bitcoin_wallets_table',
+                'create_bitcoin_addresses_table',
+                'create_bitcoin_deposits_table',
             ])
             ->runsMigrations()
             ->hasCommands(
@@ -26,13 +27,6 @@ class BitcoinServiceProvider extends PackageServiceProvider
                 BitcoinSyncWalletCommand::class,
                 BitcoinWebhookCommand::class,
             );
-
-        $this->app->singleton(BitcoindRpcApi::class, fn() => new BitcoindRpcApi(
-            config('bitcoin.rpc.host'),
-            (int)config('bitcoin.rpc.port'),
-            config('bitcoin.rpc.username'),
-            config('bitcoin.rpc.password')
-        ));
 
         $this->app->singleton(Bitcoin::class);
     }

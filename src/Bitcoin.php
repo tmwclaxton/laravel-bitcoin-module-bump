@@ -5,37 +5,33 @@ namespace Mollsoft\LaravelBitcoinModule;
 use Decimal\Decimal;
 use Mollsoft\LaravelBitcoinModule\Enums\AddressType;
 use Mollsoft\LaravelBitcoinModule\Models\BitcoinAddress;
+use Mollsoft\LaravelBitcoinModule\Models\BitcoinNode;
 use Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet;
 
 class Bitcoin
 {
-    public function __construct(protected readonly BitcoindRpcApi $api)
+    public function createWallet(BitcoinNode $node, string $name, ?string $password = null, ?string $title = null): BitcoinWallet
     {
-    }
+        $api = $node->api();
 
-    public function createWallet(string $name, ?string $password = null, ?string $title = null): BitcoinWallet
-    {
-        $this->api->request('createwallet', [
+        $api->request('createwallet', [
             'wallet_name' => $name,
             'passphrase' => $password,
             'load_on_startup' => true,
         ]);
 
         if ($password) {
-            $this->api->request('walletpassphrase', [
+            $api->request('walletpassphrase', [
                 'passphrase' => $password,
                 'timeout' => 60
             ], $name);
         }
 
-        $descriptors = $this->api->request('listdescriptors', [
+        $descriptors = $api->request('listdescriptors', [
             'private' => true,
         ], $name)['descriptors'];
 
-        /** @var class-string<BitcoinWallet> $model */
-        $model = config('bitcoin.models.wallet');
-
-        $wallet = $model::create([
+        $wallet = $node->wallets()->create([
             'name' => $name,
             'title' => $title,
             'password' => $password,
@@ -48,12 +44,15 @@ class Bitcoin
     }
 
     public function importWallet(
+        BitcoinNode $node,
         string $name,
         array $descriptors,
         ?string $password = null,
         ?string $title = null
     ): BitcoinWallet {
-        $this->api->request('createwallet', [
+        $api = $node->api();
+
+        $api->request('createwallet', [
             'wallet_name' => $name,
             'passphrase' => $password,
             'blank' => true,
@@ -61,13 +60,13 @@ class Bitcoin
         ]);
 
         if ($password) {
-            $this->api->request('walletpassphrase', [
+            $api->request('walletpassphrase', [
                 'passphrase' => $password,
                 'timeout' => 60
             ], $name);
         }
 
-        $importDescriptors = $this->api->request('importdescriptors', [
+        $importDescriptors = $api->request('importdescriptors', [
             'requests' => $descriptors,
         ], $name);
 
@@ -79,21 +78,18 @@ class Bitcoin
             }
         }
 
-        /** @var class-string<BitcoinWallet> $model */
-        $model = config('bitcoin.models.wallet');
-
-        $wallet = $model::create([
+        $wallet = $node->wallets()->create([
             'name' => $name,
             'title' => $title,
             'password' => $password,
             'descriptors' => $descriptors,
         ]);
 
-        $listReceivedByAddress = $this->api->request('listreceivedbyaddress', ['include_empty' => true], $wallet->name);
+        $listReceivedByAddress = $api->request('listreceivedbyaddress', ['include_empty' => true], $wallet->name);
         foreach ($listReceivedByAddress as $item) {
             $wallet->addresses()->create([
                 'address' => $item['address'],
-                'type' => $this->validateAddress($item['address']),
+                'type' => $this->validateAddress($node, $item['address']),
             ]);
         }
 
@@ -109,18 +105,20 @@ class Bitcoin
         ?AddressType $type = null,
         ?string $title = null
     ): BitcoinAddress {
+        $api = $wallet->node->api();
+
         if (!$type) {
             $type = config('bitcoin.address_type', AddressType::BECH32);
         }
 
         if ($wallet->password) {
-            $this->api->request('walletpassphrase', [
+            $api->request('walletpassphrase', [
                 'passphrase' => $wallet->password,
                 'timeout' => 60
             ], $wallet->name);
         }
 
-        $data = $this->api->request('getnewaddress', [
+        $data = $api->request('getnewaddress', [
             'address_type' => $type->value,
         ], $wallet->name);
         $address = $data['result'];
@@ -132,9 +130,9 @@ class Bitcoin
         ]);
     }
 
-    public function validateAddress(string $address): ?AddressType
+    public function validateAddress(BitcoinNode $node, string $address): ?AddressType
     {
-        $validateAddress = $this->api->request('validateaddress', [
+        $validateAddress = $node->api()->request('validateaddress', [
             'address' => $address
         ]);
 
@@ -154,14 +152,16 @@ class Bitcoin
 
     public function sendAll(BitcoinWallet $wallet, string $address, int|float|null $feeRate = null): string
     {
+        $api = $wallet->node->api();
+
         if ($wallet->password) {
-            $this->api->request('walletpassphrase', [
+            $api->request('walletpassphrase', [
                 'passphrase' => $wallet->password,
                 'timeout' => 60
             ], $wallet->name);
         }
 
-        $sendAll = $this->api->request('sendall', [
+        $sendAll = $api->request('sendall', [
             'recipients' => [$address],
             'estimate_mode' => $feeRate ? 'unset' : 'economical',
             'fee_rate' => $feeRate,
@@ -184,18 +184,20 @@ class Bitcoin
         int|float|null $feeRate = null,
         bool $subtractFeeFromAmount = false
     ): string {
+        $api = $wallet->node->api();
+
         if (($amount instanceof Decimal)) {
             $amount = new Decimal((string)$amount, 8);
         }
 
         if ($wallet->password) {
-            $this->api->request('walletpassphrase', [
+            $api->request('walletpassphrase', [
                 'passphrase' => $wallet->password,
                 'timeout' => 60
             ], $wallet->name);
         }
 
-        $sendToAddress = $this->api->request('sendtoaddress', [
+        $sendToAddress = $api->request('sendtoaddress', [
             'address' => $address,
             'amount' => $amount->toString(),
             'subtractfeefromamount' => $subtractFeeFromAmount,

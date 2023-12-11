@@ -11,13 +11,13 @@ use Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet;
 
 class SyncService
 {
+    protected readonly BitcoindRpcApi $api;
+
     /** @var BitcoinDeposit[] */
     protected array $newDeposits = [];
 
-    public function __construct(
-        protected readonly BitcoinWallet $wallet,
-        protected readonly BitcoindRpcApi $api,
-    ) {
+    public function __construct(protected readonly BitcoinWallet $wallet) {
+        $this->api = $this->wallet->node->api();
     }
 
     public function run(): void
