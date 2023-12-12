@@ -9,7 +9,7 @@ return [
     /*
      * Set address type of generate new addresses.
      */
-    'address_type' => \App\Enums\AddressType::BECH32,
+    'address_type' => \Mollsoft\LaravelBitcoinModule\Enums\AddressType::BECH32,
 
     /*
      * Set model class for both BitcoinWallet, BitcoinAddress, BitcoinDeposit,
