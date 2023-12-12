@@ -17,8 +17,7 @@ class SyncService
     protected readonly BitcoindRpcApi $api;
     protected readonly WebhookHandlerInterface $webhookHandler;
 
-    /** @var BitcoinDeposit[] */
-    protected array $newDeposits = [];
+    protected array $webHooks = [];
 
     public function __construct(protected readonly BitcoinWallet $wallet) {
         $this->api = $this->wallet->node->api();
@@ -115,7 +114,7 @@ class SyncService
             ]);
 
             if ($deposit?->wasRecentlyCreated) {
-                $this->newDeposits[] = $deposit;
+                $this->webHooks[] = compact('address','deposit');
             }
         }
 
@@ -124,12 +123,12 @@ class SyncService
 
     protected function executeWebhooks(): self
     {
-        foreach ($this->newDeposits as $deposit) {
+        foreach ($this->webHooks as $item) {
             try {
-                $this->webhookHandler->handle($deposit->wallet, $deposit->address, $deposit);
+                $this->webhookHandler->handle($this->wallet, $item['address'], $item['deposit']);
             }
             catch(\Exception $e) {
-                Log::error('Bitcoin WebHook for deposit '.$deposit->id.' - '.$e->getMessage());
+                Log::error('Bitcoin WebHook for deposit '.$item['deposit']->id.' - '.$e->getMessage());
             }
         }
 
