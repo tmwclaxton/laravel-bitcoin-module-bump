@@ -5,6 +5,7 @@ namespace Mollsoft\LaravelBitcoinModule;
 use Mollsoft\LaravelBitcoinModule\Commands\BitcoinSyncCommand;
 use Mollsoft\LaravelBitcoinModule\Commands\BitcoinSyncWalletCommand;
 use Mollsoft\LaravelBitcoinModule\Commands\BitcoinWebhookCommand;
+use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -26,7 +27,12 @@ class BitcoinServiceProvider extends PackageServiceProvider
                 BitcoinSyncCommand::class,
                 BitcoinSyncWalletCommand::class,
                 BitcoinWebhookCommand::class,
-            );
+            )
+            ->hasInstallCommand(function(InstallCommand $command) {
+                $command
+                    ->publishConfigFile()
+                    ->publishMigrations();
+            });
 
         $this->app->singleton(Bitcoin::class);
     }

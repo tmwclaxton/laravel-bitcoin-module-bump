@@ -95,7 +95,7 @@ echo 'TXID: '.$txid;
 
 ```bash
 > composer require mollsoft/laravel-bitcoin-module
-> php artisan vendor:publish --tag=bitcoin-config
+> php artisan bitcoin:install
 > php artisan migrate
 ```
 
