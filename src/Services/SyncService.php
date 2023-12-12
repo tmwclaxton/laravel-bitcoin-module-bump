@@ -110,7 +110,6 @@ class SyncService
                 'amount' => new Decimal((string)$item['amount']),
                 'block_height' => $item['blockheight'] ?? null,
                 'time_at' => Date::createFromTimestamp($item['time']),
-                'confirmations' => $item['confirmations'],
             ]);
 
             if ($deposit?->wasRecentlyCreated) {

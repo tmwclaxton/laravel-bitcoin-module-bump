@@ -14,7 +14,6 @@ class BitcoinDeposit extends Model
         'txid',
         'amount',
         'block_height',
-        'confirmations',
         'time_at',
     ];
 
