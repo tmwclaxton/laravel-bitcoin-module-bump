@@ -109,6 +109,7 @@ class SyncService
                 'wallet_id' => $this->wallet->id,
                 'amount' => new Decimal((string)$item['amount']),
                 'block_height' => $item['blockheight'] ?? null,
+                'confirmations' => $item['confirmations'] ?? 0,
                 'time_at' => Date::createFromTimestamp($item['time']),
             ]);
 

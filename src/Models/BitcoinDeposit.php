@@ -14,11 +14,13 @@ class BitcoinDeposit extends Model
         'txid',
         'amount',
         'block_height',
+        'confirmations',
         'time_at',
     ];
 
     protected $casts = [
         'amount' => DecimalCast::class,
+        'confirmations' => 'integer',
         'time_at' => 'datetime',
     ];
 
