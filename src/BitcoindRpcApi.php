@@ -47,7 +47,7 @@ class BitcoindRpcApi
         }
 
         if( $body['error'] ?? false ) {
-            throw new \Exception('Bitcoind '.$body['error']['code'].' - '.$body['error']['message']);
+            throw new \Exception('Bitcoind '.$method.' '.$body['error']['code'].' - '.$body['error']['message']);
         }
 
         return isset( $body['result'] ) && is_array($body['result']) ? $body['result'] : $body;
