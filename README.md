@@ -91,17 +91,40 @@ echo 'TXID: '.$txid;
 ```
 
 
-## Install
-
+### Installation
+You can install the package via composer:
 ```bash
-> composer require mollsoft/laravel-bitcoin-module
-> php artisan bitcoin:install
-> php artisan migrate
+composer require mollsoft/laravel-bitcoin-module
+```
+
+After you can run installer using command:
+```bash
+php artisan bitcoin:install
+```
+
+And run migrations:
+```bash
+php artisan migrate
+```
+
+Register Service Provider and Facade in app, edit `config/app.php`:
+```php
+'providers' => ServiceProvider::defaultProviders()->merge([
+    ...,
+    \Mollsoft\LaravelBitcoinModule\BitcoinServiceProvider::class,
+])->toArray(),
+
+'aliases' => Facade::defaultAliases()->merge([
+    ...,
+    'Litecoin' => \Mollsoft\LaravelBitcoinModule\Facades\Bitcoin::class,
+])->toArray(),
 ```
 
 In file `app/Console/Kernel` in method `schedule(Schedule $schedule)` add
 ```
-$schedule->command('bitcoin:sync')->everyMinute()->runInBackground();
+$schedule->command('bitcoin:sync')
+    ->everyMinute()
+    ->runInBackground();
 ```
 
 ## Commands
