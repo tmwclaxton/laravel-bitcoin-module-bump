@@ -116,7 +116,7 @@ Register Service Provider and Facade in app, edit `config/app.php`:
 
 'aliases' => Facade::defaultAliases()->merge([
     ...,
-    'Litecoin' => \Mollsoft\LaravelBitcoinModule\Facades\Bitcoin::class,
+    'Bitcoin' => \Mollsoft\LaravelBitcoinModule\Facades\Bitcoin::class,
 ])->toArray(),
 ```
 
