@@ -15,7 +15,10 @@ class BitcoinSyncCommand extends Command
 
     public function handle(): void
     {
-        BitcoinWallet::orderBy('id')
+        /** @var class-string<BitcoinWallet> $model */
+        $model = config('bitcoin.models.wallet');
+
+        $model::orderBy('id')
             ->each(function (BitcoinWallet $wallet) {
                 $this->info("Bitcoin Wallet $wallet->name starting sync...");
 

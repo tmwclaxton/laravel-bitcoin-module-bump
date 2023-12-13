@@ -4,11 +4,9 @@ namespace Mollsoft\LaravelBitcoinModule\Services;
 
 use Decimal\Decimal;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Mollsoft\LaravelBitcoinModule\BitcoindRpcApi;
-use Mollsoft\LaravelBitcoinModule\Models\BitcoinDeposit;
 use Mollsoft\LaravelBitcoinModule\Models\BitcoinWallet;
 use Mollsoft\LaravelBitcoinModule\WebhookHandlers\WebhookHandlerInterface;
 
