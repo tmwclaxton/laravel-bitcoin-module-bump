@@ -226,10 +226,10 @@ class Bitcoin
             'fee_rate' => $feeRate
         ], $wallet->name);
 
-        if (!($sendToAddress['txid'] ?? false)) {
+        if (!is_string($sendToAddress['result'])) {
             throw new \Exception(json_encode($sendToAddress));
         }
 
-        return $sendToAddress['txid'];
+        return $sendToAddress['result'];
     }
 }
