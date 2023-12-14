@@ -22,7 +22,6 @@ class BitcoinServiceProvider extends PackageServiceProvider
                 'create_bitcoin_addresses_table',
                 'create_bitcoin_deposits_table',
             ])
-            ->runsMigrations()
             ->hasCommands(
                 BitcoinSyncCommand::class,
                 BitcoinSyncWalletCommand::class,
