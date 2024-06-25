@@ -23,8 +23,6 @@ class BitcoinAddress extends Model
     protected $casts = [
         'type' => AddressType::class,
         'sync_at' => 'datetime',
-        'balance' => DecimalCast::class,
-        'unconfirmed_balance' => DecimalCast::class,
     ];
 
     public function wallet(): BelongsTo

@@ -28,8 +28,6 @@ class BitcoinWallet extends Model
         'password' => 'encrypted',
         'descriptors' => 'encrypted:json',
         'sync_at' => 'datetime',
-        'balance' => DecimalCast::class,
-        'unconfirmed_balance' => DecimalCast::class,
     ];
 
     public function node(): BelongsTo

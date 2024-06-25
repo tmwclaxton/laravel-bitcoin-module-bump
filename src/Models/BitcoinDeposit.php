@@ -19,7 +19,6 @@ class BitcoinDeposit extends Model
     ];
 
     protected $casts = [
-        'amount' => DecimalCast::class,
         'confirmations' => 'integer',
         'time_at' => 'datetime',
     ];
