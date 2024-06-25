@@ -10,15 +10,7 @@ use Mollsoft\LaravelBitcoinModule\Enums\AddressType;
 
 class BitcoinAddress extends Model
 {
-    protected $fillable = [
-        'wallet_id',
-        'address',
-        'type',
-        'title',
-        'sync_at',
-        'balance',
-        'unconfirmed_balance'
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'type' => AddressType::class,
