@@ -50,9 +50,13 @@ class SyncService
     protected function walletBalances(): self
     {
         $getBalances = $this->api->request('getbalances', [], $this->wallet->name);
+        // Convert scientific notation to decimal format with 8 decimal places
+        $trustedBalance = isset($getBalances['mine']['trusted']) ? number_format($getBalances['mine']['trusted'], 8, '.', '') : '0.00000000';
+        $untrustedPendingBalance = isset($getBalances['mine']['untrusted_pending']) ? number_format($getBalances['mine']['untrusted_pending'], 8, '.', '') : '0.00000000';
+
         $this->wallet->update([
-            'balance' => new Decimal((string)$getBalances['mine']['trusted'], 8),
-            'unconfirmed_balance' => new Decimal((string)$getBalances['mine']['untrusted_pending'], 8),
+            'balance' => $trustedBalance,
+            'unconfirmed_balance' => $untrustedPendingBalance,
             'sync_at' => Date::now(),
         ]);
 
