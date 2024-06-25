@@ -50,7 +50,6 @@ class SyncService
     protected function walletBalances(): self
     {
         $getBalances = $this->api->request('getbalances', [], $this->wallet->name);
-        // Convert scientific notation to decimal format with 8 decimal places
         $trustedBalance = isset($getBalances['mine']['trusted']) ? number_format($getBalances['mine']['trusted'], 8, '.', '') : '0.00000000';
         $untrustedPendingBalance = isset($getBalances['mine']['untrusted_pending']) ? number_format($getBalances['mine']['untrusted_pending'], 8, '.', '') : '0.00000000';
 
@@ -82,10 +81,11 @@ class SyncService
                     ->whereAddress($item['address'])
                     ->lockForUpdate()
                     ->first();
-                $address?->increment(
-                    $item['confirmations'] > 0 ? 'balance' : 'unconfirmed_balance',
-                    (string)$item['amount']
-                );
+                $amount = isset($item['amount']) ? number_format($item['amount'], 8, '.', '') : '0.00000000';
+                $address->update([
+                    'balance' => $amount,
+                    'unconfirmed_balance' => $item['confirmations'] === 0 ? $amount : 0,
+                ]);
             }
         }
 
@@ -104,12 +104,12 @@ class SyncService
             }
 
             $address = $this->wallet->addresses()->whereAddress($item['address'])->first();
-
+            $amount = isset($item['amount']) ? number_format($item['amount'], 8, '.', '') : '0.00000000';
             $deposit = $address?->deposits()->updateOrCreate([
                 'txid' => $item['txid']
             ], [
                 'wallet_id' => $this->wallet->id,
-                'amount' => new Decimal((string)$item['amount']),
+                'amount' => $amount,
                 'block_height' => $item['blockheight'] ?? null,
                 'confirmations' => $item['confirmations'] ?? 0,
                 'time_at' => Date::createFromTimestamp($item['time']),
